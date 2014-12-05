@@ -40,7 +40,7 @@ class MyPanel2 ( wx.Panel ):
         
         bSizer15 = wx.BoxSizer( wx.VERTICAL )
         
-        self.m_text_ip = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_text_ip = wx.TextCtrl( self, wx.ID_ANY, '127.0.0.1', wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer15.Add( self.m_text_ip, 0, wx.ALL, 5 )
         
         
@@ -57,7 +57,7 @@ class MyPanel2 ( wx.Panel ):
         
         bSizer17 = wx.BoxSizer( wx.VERTICAL )
         
-        self.m_text_port = wx.TextCtrl( self, wx.ID_ANY, wx.EmptyString, wx.DefaultPosition, wx.DefaultSize, 0 )
+        self.m_text_port = wx.TextCtrl( self, wx.ID_ANY, '8899', wx.DefaultPosition, wx.DefaultSize, 0 )
         bSizer17.Add( self.m_text_port, 0, wx.ALL, 5 )
         
         
@@ -246,11 +246,13 @@ class MyPanel2 ( wx.Panel ):
     def m_bt_testOnButtonClick( self, event ):
         struct.calcsize('!2B10H')
         try:
-            data = struct.pack('!2s','\x40\x01')
+            data = struct.pack('!2s','\x01\x40')
             self.conn._sendSized(data)
             data = self.conn._readSized(-1)
-            wx.MessageDialog(self,data.encode('hex'),u'通知',style=wx.OK|wx.CENTRE).ShowModal()
-      
+            if  data:
+                wx.MessageDialog(self,data.encode('hex'),u'通知',style=wx.OK|wx.CENTRE).ShowModal()
+            else:
+                wx.MessageDialog(self,'nothing got back',u'通知',style=wx.OK|wx.CENTRE).ShowModal()
             
         except Exception,e:
             print e
@@ -260,10 +262,10 @@ class MyPanel2 ( wx.Panel ):
     
     def m_bt_readOnButtonClick( self, event ):
          try:
-            data = struct.pack('!2s','\x40\x02')
+            data = struct.pack('>2s','\x40\x02')
             self.conn._sendSized(data)
             data = self.conn._readSized(-1)
-            if not data:
+            if  data:
                 wx.MessageDialog(self,data.encode('hex'),u'通知',style=wx.OK|wx.CENTRE).ShowModal()
             else:
                 wx.MessageDialog(self,'nothing got back',u'通知',style=wx.OK|wx.CENTRE).ShowModal()
@@ -280,7 +282,10 @@ class MyPanel2 ( wx.Panel ):
             data = struct.pack('!2s','\x40\x03')
             self.conn._sendSized(data)
             data = self.conn._readSized(-1)
-            wx.MessageDialog(self,data.encode('hex'),u'通知',style=wx.OK|wx.CENTRE).ShowModal()
+            if  data:
+                wx.MessageDialog(self,data.encode('hex'),u'通知',style=wx.OK|wx.CENTRE).ShowModal()
+            else:
+                wx.MessageDialog(self,'nothing got back',u'通知',style=wx.OK|wx.CENTRE).ShowModal()
       
             
          except Exception,e:
@@ -485,6 +490,7 @@ class Client(object):
             print 1
         except socket.timeout,e:
             print 2
+            #raise e
         except Exception,e:
             print 3,e,type(e)
             self.isconnected = False
